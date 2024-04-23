@@ -163,11 +163,14 @@ def output_result(jobid):
     job = get_job_by_id(jobid)
     status = job['status']
     logging.debug('Job status received')
-    if (status == 'complete'):
+    if (status == 'Complete'):
         return get_result(jobid)
+        # Instead of return result, return the list of all information and create output from results here $$$$$$$$$$$$$$$$$$$$$
     else:
-        logging.warning('The summary has not finished yet')
-        return 'Your summary is still being analyzed and calculated\n'
+        logging.warning('The job has not finished yet')
+        return 'Your data is still being analyzed and calculated\n'
+
+    # Create specific app route that gets the results, takes the image (graph and map) data, then downloads the images $$$$$$$$$$$$$$$$$$
 
 # Main function definition
 
