@@ -23,7 +23,7 @@ First, ensure the environment you are using has Docker installed, and make sure 
 ### Container Build Preparation
 Create a folder in your directory to input the code found in this folder by running `mkdir traffic_app`. 
 
-Run `cd traffic_app` to enter the created folder then individually run the `wget <linktofile>` command to import all the files from this repository into your directory. All the files should be in this folder. In this **traffic_app** directory run `mkdir data` to create a sub-directory for redis.
+Run `cd traffic_app` to enter the created folder then run the `git clone https://github.com/AaronPandian/austin-traffic-analysis.git` command to import all the files from this repository into your working directory. All the files should be in this folder. In this **traffic_app** directory run `mkdir data` to create a sub-directory for Redis **only if** the empty data folder from this directory did not 
 
 Once all the files are gathered, double-check with `ls`.  
 
