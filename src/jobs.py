@@ -26,16 +26,19 @@ def _generate_jid():
     logging.info('Generating new job ID')
     return str(uuid.uuid4())
 
-def _instantiate_job(jid, status, start, end):
+def _instantiate_job(jid, status, start, end, austin_map, graph, report):
     """
     Create the job object description as a python dictionary. Requires the job id,
-    status, start and end parameters.
+    status, start and end parameters, and yes or no for other data requests
     """
     logging.info('Formatting new job')
     return {'id': jid,
             'status': status,
             'start': start,
-            'end': end }
+            'end': end,
+            'incident_map': austin_map,
+            'incident_graph': graph,
+            'incident_report': report }
 
 def _save_job(jid, job_dict):
     """Save a job object in the Redis database."""
@@ -47,11 +50,11 @@ def _queue_job(jid):
     q.put(jid)
     return
 
-def add_job(start, end, status="submitted"):
+def add_job(start, end, austin_map, graph, report, status="submitted"):
     """Add a job to the redis queue."""
     logging.info('Adding new job to queue')
     jid = _generate_jid()
-    job_dict = _instantiate_job(jid, status, start, end)
+    job_dict = _instantiate_job(jid, status, start, end, austin_map, graph, report)
     _save_job(jid, job_dict)
     _queue_job(jid)
     return job_dict
