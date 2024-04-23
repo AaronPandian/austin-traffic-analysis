@@ -16,7 +16,7 @@ logging.basicConfig(level=log_var)
 
 # Function definitions
 @q.worker
-def do_work(jobid):
+def create_summary(jobid):
     """
     This function receives a job request and finds the average location of traffic
     incidents in the given timeframe.
@@ -27,8 +27,6 @@ def do_work(jobid):
     Returns:
         result (list): Summary statement in list format.
     """
-    update_job_status(jobid, 'in progress')
-    logging.info('Worker starting work')
 
     # Initiate analysis
     job = get_job_by_id(jobid)
@@ -55,7 +53,7 @@ def do_work(jobid):
     except TypeError:
         logging.warning('Worker could not initialize dates correctly')
         post_result(jobid, 'Data processing was unsuccessful')
-        update_job_status(jobid, 'complete')
+        update_job_status(jobid, 'Complete')
         return
         
     logging.info('Worker finished job')
@@ -63,10 +61,74 @@ def do_work(jobid):
     latavg = sum(incident_latitudes)/len(incident_latitudes)
     freq = len(incident_latitudes)
     summary = f"The average incident location is at ({latavg}N, {lonavg}W), and there were {freq} incidents during this period."
-    update_job_status(jobid, 'complete')
-    logging.info('Worker compiled summary')
-    post_result(jobid, [summary])
-    return
+    logging.info('Worker compiled the summary')
+    return summary
+
+@q.worker
+def create_chart(jobid):
+    """
+    This function, based on the summary results, creates a bar chart of the charecteristics
+    of observed incidents over the noted time period.
+
+    Args:
+        jobid (string): Unique job ID
+
+    Returns:
+        result (list): Array of information to create the chart.
+    """
+
+@q.worker
+def create_map(jobid):
+    """
+    This function, based on the summary results, creates a map
+    of the observed incidents over the noted time period
+
+    Args:
+        jobid (string): Unique job ID
+
+    Returns:
+        result (list): Array of information to create the chart.
+    """
+
+@q.worker
+def create_regional_report(jobid):
+    """
+    This function, based on the time range provided, creates a summary report on the 
+    incident data based on the region they occured in Austin.
+
+    Args:
+        jobid (string): Unique job ID
+
+    Returns:
+        result (list): Summary report in list format.
+    """
 
 # Main function definition
-do_work()
+update_job_status(jobid, 'In Progress')
+logging.info('Worker starting work')
+
+# Initiate analysis
+job = get_job_by_id(jobid)
+map_request = job['incident_map']
+graph_request = job['incident_graph']
+report_request = job['incident_report']
+
+# Run the summary regardless
+summary = create_summary()
+
+# Run checks for the other data
+incident_map = 'Map not requested'
+if (map_request == 'yes'):
+    incident_map = create_map(jobid)
+
+incident_graph = 'Graph not requested'
+if (graph_request == 'yes'):
+    incident_graph = create_graph(jobid)
+
+incident_report = 'Report not requested'
+if (report_request == 'yes'):
+    incident_report = create_regional_report(jobid)
+
+# Finish the Job
+update_job_status(jobid, 'Complete')
+post_result(jobid, [summary, austin_map, graph, report])
