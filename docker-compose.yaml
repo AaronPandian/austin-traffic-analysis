@@ -1,0 +1,35 @@
+---
+version: "3"
+
+services:
+  redis-db:
+    image: redis:7
+    volumes:
+      - ./data:/data
+    ports:
+      - 6379:6379
+    user: "1000:1000"
+    command: [ "--save", "1", "1" ]
+  flask-api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: aaron_p/traffic-app:1.0
+    ports:
+      - 5000:5000
+    depends_on:
+      - redis-db
+    environment:
+      - REDIS_IP:redis-db
+      - LOG_LEVEL:DEBUG
+    command: [ "python3", "api.py" ]
+  worker-api:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: aaron_p/traffic-app:1.0
+    depends_on:
+      - redis-db
+    environment:
+      - LOG_LEVEL=DEBUG
+    command: [ "python3", "worker.py" ]
