@@ -88,6 +88,13 @@ def get_ids():
     # Return everything as a JSON object
     return return_value
 
+"""
+test queried route: 
+
+@app.route('/ids?offset&limit', methods=['GET'])
+def queried_get_ids():
+"""
+
 @app.route('/ids/<desired_id>', methods=['GET'])
 def get_id_data(desired_id):
     logging.info('Getting specified data from redis')
@@ -124,7 +131,7 @@ def submit_job():
         logging.info('Posting job to seperate redis database')
         data = request.get_json()
         # Set parameters to be the start and end dates
-        job_dict = add_job(data['start'], data['end'])
+        job_dict = add_job(data['start'], data['end'], data['incident_map'], data['incident_graph'], data['incident_report'])
         return 'POST request completed for desired job.\n'
     elif request.method == 'GET':
         logging.info('Getting all data from seperate redis database')
@@ -164,8 +171,12 @@ def output_result(jobid):
     status = job['status']
     logging.debug('Job status received')
     if (status == 'Complete'):
-        return get_result(jobid)
+        result = get_result(jobid)
         # Instead of return result, return the list of all information and create output from results here $$$$$$$$$$$$$$$$$$$$$
+        if result[1] != 'Map not requested':
+            map_data = result[1]
+            fig = px.scatter_geo(data, lat='latitude', lon='longitude',hover_name='Address', title='Austin Traffic Incidents Map')
+            print(fig.show())
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
