@@ -10,6 +10,10 @@ import csv
 from jobs import add_job, get_job_by_id, get_job_ids, get_result
 import os
 import logging
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+#from io import StringIO
 
 # Global variables/constants
 app = Flask(__name__)
@@ -172,11 +176,25 @@ def output_result(jobid):
     logging.debug('Job status received')
     if (status == 'Complete'):
         result = get_result(jobid)
+        result_map = result[1]
         # Instead of return result, return the list of all information and create output from results here $$$$$$$$$$$$$$$$$$$$$
         if result[1] != 'Map not requested':
-            map_data = result[1]
-            fig = px.scatter_geo(data, lat='latitude', lon='longitude',hover_name='Address', title='Austin Traffic Incidents Map')
-            print(fig.show())
+            df = pd.DataFrame(result[1])
+            fig = go.Figure()
+
+            fig.add_trace(go.Scattergeo(lon = df['longitudes'], lat = df['latitudes'],text = df['Address'], mode = 'markers', marker = dict(size = 8,opacity = 0.8, reversescale = True, autocolorscale = False, symbol = 'circle', line = dict(width=1, color='rgba(102, 102, 102)'), colorscale = 'Blues', cmin = 0, color = df['latitudes'], cmax = df['latitudes'].max(), colorbar_title = 'Latitude')))
+
+            #fig.update_layout(title = 'Scatter Plot of Locations', geo_scope='usa' )
+            fig.update_geos(center=dict(lon=-99.9018, lat=31.9686), projection_scale=5, scope='usa')
+            fig.show()
+            fig.write_image("scatterplot_map.png", width=800, height=600, scale=2)
+            """
+            map_data = pd.read_json(StringIO(data))#, dtype_backend="numpy_nullable")
+            map_data = map_data.dropna(subset=['latitudes', 'longitudes', 'Address'])
+            fig = px.scatter_geo(map_data, lat='latitudes', lon='longitudes',hover_name='Address', title='Austin Traffic Incidents Map')
+            """
+            result_map = fig.show()
+        return f'{result[0]} \n {result_map}\n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'

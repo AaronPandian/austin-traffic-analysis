@@ -40,6 +40,7 @@ def create_summary(jobid):
     incident_longitudes = []
     logging.debug('Worker read job data')
     start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
+    end_date = date(int(end[6:10]), int(end[0:2]), int(end[3:5]))
     try:
         # Gather the average location of all incidents within timeframe
         for item in rd.keys():
@@ -48,7 +49,6 @@ def create_summary(jobid):
             data_date = incident['Published Date']
             incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
             #start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
-            end_date = date(int(end[6:10]), int(end[0:2]), int(end[3:5]))
             if (start_date <= incident_date and incident_date <= end_date):
                 # Append the locations to the lists
                 incident_latitudes.append(float(incident['Latitude']))
@@ -106,21 +106,21 @@ def create_map(jobid):
     incident_longitudes = []
     incident_addresses = []
     logging.debug('Worker read job data')
+    start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
+    end_date = date(int(end[6:10]), int(end[0:2]), int(end[3:5]))
     try:
         for item in rd.keys():
             incident = json.loads(rd.get(item))
             #Check if data is valid (inside job timeframe)
             data_date = incident['Published Date']
             incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
-            start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
-            end_date = date(int(end[6:10]), int(end[0:2]), int(end[3:5]))
             if (start_date <= incident_date and incident_date <= end_date):
                 #Append data to list
                 incident_latitudes.append(float(incident['Latitude']))
                 incident_longitudes.append(float(incident['Longitude']))
                 incident_addresses.append(str(incident['Address']))
         logging.debug('Worker finished analysis')
-        result = {'latitudes':incident_latitudes, 'longitudes': incident_longitudes, 'Address': incident_address}
+        result = {'latitudes':incident_latitudes, 'longitudes': incident_longitudes, 'Address': incident_addresses}
         return result 
     except TypeError:
         logging.warning('Worker could not initialize dates correctly')
@@ -158,8 +158,8 @@ def do_work(jobid):
     
     # Run checks for the other data
     incident_map = 'Map not requested'
-    #if (map_request == 'yes'):
-    #    incident_map = create_map(jobid)
+    if (map_request == 'yes'):
+        incident_map = create_map(jobid)
 
     incident_graph = 'Graph not requested'
     #if (graph_request == 'yes'):
