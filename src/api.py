@@ -197,7 +197,7 @@ def output_result(jobid):
             except Exception as e:
                 print("Error when saving map to directory:", e)
                 logging.error('Failed to save image\n')
-        return f'{result[0]} \n Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:/app/{result_map}\n'
+        return f'{result[0]} \n Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:{result_map} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
