@@ -26,7 +26,7 @@ COPY ./test/test_script.py /app/test/test_script.py
 #COPY ./test/test_jobs.py /app/test/test_jobs.py
 
 
-RUN chmod +rx /app/src/api.py
+RUN chmod +rwx /app/src/api.py
 RUN chmod +rx /app/src/worker.py
 RUN chmod +rx /app/src/jobs.py
 

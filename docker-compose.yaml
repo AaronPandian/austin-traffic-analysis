@@ -24,6 +24,7 @@ services:
       - LOG_LEVEL=DEBUG
     volumes:
       - ./config.yaml:/config.yaml:rw
+      - ./results/map.png:/results/map.png:rw
     command: [ "python3", "/app/src/api.py" ]
   worker-api:
     build:
