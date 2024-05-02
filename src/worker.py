@@ -140,6 +140,78 @@ def create_regional_report(jobid):
     Returns:
         result (list): Summary report in list format.
     """
+    job = get_job_by_id(jobid)
+    start = job['start']
+    end = job['end']
+    incident_latitudes = []
+    incident_longitudes = []
+    Downtown_Austin = [30.2672, -97.7431] # N, W; lat, long
+    cDowntown = 0 #count of incidients in downtown, +- 0.01 degrees in either direction
+    cEast = 0 
+    cWest = 0
+    cNorth = 0
+    cSouth = 0
+    cNE = 0
+    cNW = 0
+    cSW = 0
+    cSE = 0
+    logging.debug('Worker read job data')
+    start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
+    end_date = date(int(end[6:10]), int(end[0:2]), int(end[3:5]))
+    try:
+        for item in rd.keys():
+            incident = json.loads(rd.get(item))
+            #Check if data is valid (inside job timeframe)
+            data_date = incident['Published Date']
+            incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
+            if (start_date <= incident_date and incident_date <= end_date):
+                #Append data to list
+                incident_latitudes.append(float(incident['Latitude']))
+                incident_longitudes.append(float(incident['Longitude']))
+        rel_lat = ['Same']*len(incident_latitudes)
+        for i in range(len(incident_latitudes)):
+            if incident_latitudes[i]-Downtown_Austin[0] > 0.01:
+                rel_lat[i] = 'North'
+            elif incident_latitudes[i]-Downtown_Austin[0] < 0.01:
+                rel_lat[i] = 'South'
+        rel_lon = ['Same']*len(incident_longitudes)
+        for i in range(len(incident_longitudes)):
+            if incident_longitudes[i]-Downtown_Austin[1] > 0.01:
+                rel_lon[i] = 'East'
+            elif incident_latitudes[i]-Downtown_Austin[1] < 0.01:
+                rel_lon[i] = 'West'
+        for lat in rel_lat:
+            for lon in rel_lon:
+                if (lat=='Same') and (lon=='Same'):
+                    cDowntown+=1
+                elif lat=='North':
+                    if lon=='Same':
+                        cNorth+=1
+                    elif lon=='East':
+                        cNE+=1
+                    else:
+                        cNW+=1
+                elif lat=='South':
+                    if lon=='Same':
+                        cSouth+=1
+                    elif lon=='East':
+                        cSE+=1
+                    else:
+                        cSW+=1
+                else:
+                    if lon=='East':
+                        cEast+=1
+                    else:
+                        cWest+=1
+        logging.debug('Worker finished analysis')
+        report = {'Downtown':cDowntown, 'North': cNorth, 'NE':cNE, 'NW':cNW, 'East': cEast, 'West': cWest, 'South':cSouth, 'SW':cSW, 'SE':cSE}
+        return report
+    except TypeError:
+        logging.warning('Worker could not initialize dates correctly')
+        post_result(jobid, 'Data processing was unsuccessful')
+        update_job_status(jobid, 'Complete')
+        return
+
 @q.worker
 def do_work(jobid):
     # Main function definition
@@ -166,8 +238,8 @@ def do_work(jobid):
     #    incident_graph = create_graph(jobid)
 
     incident_report = 'Report not requested'
-    #if (report_request == 'yes'):
-    #    incident_report = create_regional_report(jobid)
+    if (report_request == 'yes'):
+        incident_report = create_regional_report(jobid)
     
 
     # Finish the Job

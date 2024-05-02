@@ -177,8 +177,9 @@ def output_result(jobid):
     if (status == 'Complete'):
         result = get_result(jobid)
         result_map = result[1]
+        result_report = result[3]
         # Instead of return result, return the list of all information and create output from results here $$$$$$$$$$$$$$$$$$$$$
-        if result[1] != 'Map not requested':
+        if result_map != 'Map not requested':
             logging.debug('Attempting to make map\n')
             df = pd.DataFrame(result[1])
             fig = go.Figure()
@@ -191,13 +192,16 @@ def output_result(jobid):
                 logging.debug('Attempting to save map\n')
                 curr_dir = os.path.abspath(os.getcwd())
                 filename = 'Austin_Incident_Map.png'
-                result_map = os.path.join(curr_dir, filename)
-                fig.write_image(result_map, width=800, height=600, scale=2)
+                map_path = os.path.join(curr_dir, filename)
+                fig.write_image(map_path, width=800, height=600, scale=2)
                 logging.debug('Image saved\n')
+                result_map = 'Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:{map_path} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
             except Exception as e:
                 print("Error when saving map to directory:", e)
                 logging.error('Failed to save image\n')
-        return f'{result[0]} \n Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:{result_map} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
+        if result_report != 'Report not requested':
+            result_report =  f'This is the accident distribution for each region of austin(in the format of \'Region\': <#incidents>):\n {result[2]}'
+        return f'{result[0]} \n {result_map} {result_report}\n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
