@@ -13,7 +13,6 @@ import logging
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-#from io import StringIO
 
 # Global variables/constants
 app = Flask(__name__)
@@ -31,9 +30,9 @@ def handle_data():
 
     Returns: (only one of the two return types are ouput)
         result (string): For post and delete requests, a string is sent 
-        noting the request has been completed.
+                         noting the request has been completed.
         result_value (list): A list of all the traffic incidents within
-        the dataset.
+                             the dataset.
     """
     if request.method == 'POST':
         logging.info('Accessing data from database')
@@ -92,13 +91,6 @@ def get_ids():
     # Return everything as a JSON object
     return return_value
 
-"""
-test queried route: 
-
-@app.route('/ids?offset&limit', methods=['GET'])
-def queried_get_ids():
-"""
-
 @app.route('/ids/<desired_id>', methods=['GET'])
 def get_id_data(desired_id):
     logging.info('Getting specified data from redis')
@@ -127,7 +119,8 @@ def submit_job():
     requested jobs.
 
     Returns: (only one of the two return types are ouput)
-        result (string): Statement mentioning the POST request has been completed.
+        result (string): Statement mentioning the POST request has been 
+                         completed.
         result (list): List of all the unique job IDs in the queue. 
 
     """
@@ -166,9 +159,18 @@ def output_result(jobid):
         jobid (string): Unique job ID.
 
     Returns: (only one of the two return types are ouput)
-        result (string): A status statement.  
-        result (list): A summary statement of the traffic incidents between 
-        the specified job timeframe. 
+        result[0] (string): A summary statement of the traffic incidents 
+                            between the specified job timeframe. 
+        result_map (string): A statement with directions on how to download
+                             the computed map image to a local working 
+                             directory.
+        result_chart (string): A statement with directions on how to 
+                               download the computed chart image to a local
+                               working directory.
+        result_report(string): A report statement of the regional 
+                               distribution of the traffic incidents in the
+                               specified job timeframe. 
+        
     """
     logging.info('Getting job results from seperate redis database')
     job = get_job_by_id(jobid)
@@ -177,8 +179,9 @@ def output_result(jobid):
     if (status == 'Complete'):
         result = get_result(jobid)
         result_map_test = result[1]
+        result_chart_test = result[2]
         result_report_test = result[3]
-        # Instead of return result, return the list of all information and create output from results here $$$$$$$$$$$$$$$$$$$$$
+        #Checking if a map was requested, if so make one
         if result_map_test != 'Map not requested':
             logging.debug('Attempting to make map\n')
             df = pd.DataFrame(result[1])
@@ -201,16 +204,43 @@ def output_result(jobid):
                 logging.error('Failed to save image\n')
         else:
             result_report = result_report_test
+
+        if result_chart_test != 'Graph not requested':
+        #make chart
+            result_chart = ''
+
+        #Checking if a report was requested, if so make one
         if result_report_test != 'Report not requested':
+            logging.debug('Making incident report\n')
             result_report =  f'This is the accident distribution for each region of austin(in the format of \'Region\': <#incidents>):\n {result_report_test}\nNote that downtown is defined as 30.2672 N (+- 0.01 degrees), -97.7431 W (+-0.01 degrees). Also note that the other regions are relative to downtown. For example, \'North\' Austin is 30.2772 N (or greater), and -97.7431 W (+-0.01 degrees).\n'
         else:
             result_report = result_report_test
+        #Compile the computed results into neat output with standardized format
         return f'{result[0]} \n {result_map} \n{result_report}\n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
 
-    # Create specific app route that gets the results, takes the image (graph and map) data, then downloads the images $$$$$$$$$$$$$$$$$$
+@app.route('/help', methods=["GET"])
+def help():
+    """
+    This is a function that provides a string with short descriptions of 
+    each route and it's usages.
+
+    Args:
+        None
+
+    Returns:
+        help_str (string): A brief summary with short descriptions of each 
+                           api route and its usage. 
+    """
+    general_info = "Note that for all the route endpoints, they build off of the base url (either 'localhost:5000/' or 'http://127.0.0.1:5000/'). As such, for a route, say '/data', the final url to curl could be 'localhost:5000/data' plus the desired method.\n"
+    route1 = "The '/data' route has 'GET', 'POST', and 'DELETE' methods that can be used to load in the data, view the loaded data, and delete the data from the redis database server\n"
+    route2 = "The '/ids' route has a 'GET' method that is used to list all of the unique traffic incident report IDs. If the information for a specific traffic id is desired, it can be viewed by querying the desired id to the end, like so for example <desired_id>: '/ids/<desired_id>'.\n"
+    route3 = "The '/jobs' route has 'POST' and 'GET' methods to post a job request and view the details of all exisiting job requests respetively. Note that if a specific job ID's details are desired, they can be queried with a 'GET' method. For example, with an example job id of <ex_job_id>, the specifics for this job id can be displayed with '/jobs/<ex_job_id>'.\n"
+    route4 = "The '/results/<desired_id>' route has a 'GET' method that attmepts to compute results for a desired job id, <desired_id>, then displays these results. Note that if a chart or map is requested, it will be saved to the container on which the app is run, and can later be retrieved with a docker cp request (if on linux) to download to the local working directory.\n"
+    help_str = f'{general_info}\n{route1}\n{route2}\n{route3}\n{route4}\n' 
+    return help_str
 
 # Main function definition
 

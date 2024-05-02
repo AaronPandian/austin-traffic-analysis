@@ -15,10 +15,8 @@ import pandas as pd
 # Global variables / constants
 log_var = os.environ.get('LOG_LEVEL', 'DEBUG') # set in docker-compose
 logging.basicConfig(level=log_var)
-#job_id = ""
 
 # Function definitions
-#@q.worker
 def create_summary(jobid):
     """
     This function receives a job request and finds the average location of traffic
@@ -28,7 +26,8 @@ def create_summary(jobid):
         jobid (string): Unique job ID
 
     Returns:
-        result (list): Summary statement in list format.
+        summary (string): A summary statistics statement of the traffic 
+                          incidents over the timeframe specified by the job.
     """
 
     # Initiate analysis
@@ -64,21 +63,11 @@ def create_summary(jobid):
         post_result(jobid, 'Data processing was unsuccessful')
         update_job_status(jobid, 'Complete')
         return "Failed to process data, check if data and job parameters were posted correctly\n"
-    """    
-    logging.info('Worker finished job')
-    lonavg = sum(incident_longitudes)/len(incident_longitudes)
-    latavg = sum(incident_latitudes)/len(incident_latitudes)
-    freq = len(incident_latitudes)
-    summary = f"The average incident location is at ({latavg}N, {lonavg}W), and there were {freq} incidents during this period."
-    logging.info('Worker compiled the summary')
-    return summary
-    """
 
-#@q.worker
 def create_chart(jobid):
     """
-    This function, based on the summary results, creates a bar chart of the charecteristics
-    of observed incidents over the noted time period.
+    This function, based on the summary results, creates a bar chart of the
+    charecteristics of observed incidents over the noted time period.
 
     Args:
         jobid (string): Unique job ID
@@ -86,8 +75,48 @@ def create_chart(jobid):
     Returns:
         result (list): Array of information to create the chart.
     """
+    job = get_job_by_id(jobid)
+    start = job['start']
+    end = job['end']
+    incident_times = []
+    incident_dates = []
+    logging.debug('Worker read job data')
+    start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
+    end_date = date(int(end[6:10]), int(end[0:2]), int(end[3:5]))
+    timeStep = 'year'
+    duration = end_date.year-start_date.year
+    if start_date.year==end_date.year:
+        if start_date.month==end_date.month:
+            if start_date.day==end_date.day:
+                timeStep = 'hour'
+            else:
+                timeStep = 'day'
+                duration = end_date.day-start_date.day
+        else:
+            timeStep = 'month'
+            duration = end_date.month-start_date.month
+    
+    #making list of valid days and/or times depending on timestep
+    for item in rd.keys():
+        incident = json.loads(rd.get(item))
+        #Check if data is valid (inside job timeframe)
+        data_date = incident['Published Date']
+        incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
+        if (start_date <= incident_date and incident_date <= end_date):
+            #Append data to list
+            if timeStep == 'hour':
+                incident_time = data_date[11:19]
+                if data_date[20:23]=='PM':
+                    incident_time = str(float(incident_time[0:2])+12)
+                incident_times.append(incident_time)
+                continue
+            else:
+                incident_dates.append(incident_date)
+    if timeStep=='hour':
+        #for item in incident_times:
+        duration = max(incident_times)-min(incident_times)   
+    return 
 
-#@q.worker
 def create_map(jobid):
     """
     This function, based on the summary results, creates a map
@@ -97,7 +126,8 @@ def create_map(jobid):
         jobid (string): Unique job ID
 
     Returns:
-        result (dictionary): Dictionary of lists with information to create the chart.
+        result (dictionary): Dictionary of lists with information to create
+                             the incident map.
     """
     job = get_job_by_id(jobid)
     start = job['start']
@@ -128,7 +158,6 @@ def create_map(jobid):
         update_job_status(jobid, 'Complete')
         return 
 
-#@q.worker
 def create_regional_report(jobid):
     """
     This function, based on the time range provided, creates a summary report on the 
@@ -138,7 +167,9 @@ def create_regional_report(jobid):
         jobid (string): Unique job ID
 
     Returns:
-        result (list): Summary report in list format.
+        report (dict): Summary report of the regional distribution of the 
+                       incidents that occured during the timeframe specified
+                       by the job.
     """
     job = get_job_by_id(jobid)
     start = job['start']
@@ -227,15 +258,14 @@ def do_work(jobid):
     # Run the summary regardless
     summary = create_summary(jobid)
     
-    
     # Run checks for the other data
     incident_map = 'Map not requested'
     if (map_request == 'yes'):
         incident_map = create_map(jobid)
 
     incident_graph = 'Graph not requested'
-    #if (graph_request == 'yes'):
-    #    incident_graph = create_graph(jobid)
+    if (graph_request == 'yes'):
+        incident_graph = create_graph(jobid)
 
     incident_report = 'Report not requested'
     if (report_request == 'yes'):
