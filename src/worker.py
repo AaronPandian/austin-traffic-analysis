@@ -169,40 +169,40 @@ def create_regional_report(jobid):
                 incident_latitudes.append(float(incident['Latitude']))
                 incident_longitudes.append(float(incident['Longitude']))
         rel_lat = ['Same']*len(incident_latitudes)
-        for i in range(len(incident_latitudes)):
-            if incident_latitudes[i]-Downtown_Austin[0] > 0.01:
-                rel_lat[i] = 'North'
-            elif incident_latitudes[i]-Downtown_Austin[0] < 0.01:
-                rel_lat[i] = 'South'
+        for index,lat in enumerate(incident_latitudes):
+            if lat-Downtown_Austin[0] > 0.01:
+                rel_lat[index] = 'North'
+            elif lat-Downtown_Austin[0] < -0.01:
+                rel_lat[index] = 'South'
         rel_lon = ['Same']*len(incident_longitudes)
-        for i in range(len(incident_longitudes)):
-            if incident_longitudes[i]-Downtown_Austin[1] > 0.01:
-                rel_lon[i] = 'East'
-            elif incident_latitudes[i]-Downtown_Austin[1] < 0.01:
-                rel_lon[i] = 'West'
-        for lat in rel_lat:
-            for lon in rel_lon:
-                if (lat=='Same') and (lon=='Same'):
-                    cDowntown+=1
-                elif lat=='North':
-                    if lon=='Same':
-                        cNorth+=1
-                    elif lon=='East':
-                        cNE+=1
-                    else:
-                        cNW+=1
-                elif lat=='South':
-                    if lon=='Same':
-                        cSouth+=1
-                    elif lon=='East':
-                        cSE+=1
-                    else:
-                        cSW+=1
+        for index,lon in enumerate(incident_longitudes):
+            if abs(lon)-abs(Downtown_Austin[1]) < -0.01:
+                rel_lon[index] = 'East'
+            elif abs(lon)-abs(Downtown_Austin[1]) > 0.01:
+                rel_lon[index] = 'West'
+        for index, lat in enumerate(rel_lat):
+            lon = rel_lon[i]
+            if (lat=='Same') and (lon=='Same'):
+                cDowntown+=1
+            elif lat=='North':
+                if lon=='Same':
+                    cNorth+=1
+                elif lon=='East':
+                    cNE+=1
                 else:
-                    if lon=='East':
-                        cEast+=1
-                    else:
-                        cWest+=1
+                    cNW+=1
+            elif lat=='South':
+                if lon=='Same':
+                    cSouth+=1
+                elif lon=='East':
+                    cSE+=1
+                else:
+                    cSW+=1
+            else:
+                if lon=='East':
+                    cEast+=1
+                else:
+                    cWest+=1
         logging.debug('Worker finished analysis')
         report = {'Downtown':cDowntown, 'North': cNorth, 'NE':cNE, 'NW':cNW, 'East': cEast, 'West': cWest, 'South':cSouth, 'SW':cSW, 'SE':cSE}
         return report
