@@ -105,17 +105,65 @@ def create_chart(jobid):
         if (start_date <= incident_date and incident_date <= end_date):
             #Append data to list
             if timeStep == 'hour':
-                incident_time = data_date[11:19]
-                if data_date[20:23]=='PM':
-                    incident_time = str(float(incident_time[0:2])+12)
+                incident_time = str(data_date[11:19]) #storing hh:mm:ss
+                if str(data_date[20:23])=='PM':
+                    incident_time[0:2] = str(int(incident_time[0:2])+12)
                 incident_times.append(incident_time)
-                continue
             else:
                 incident_dates.append(incident_date)
     if timeStep=='hour':
-        #for item in incident_times:
-        duration = max(incident_times)-min(incident_times)   
-    return 
+        #Morning is defined as 6am-12pm, afternoon is 12pm-5pm (12-17 military time), evening is 5pm-10pm(17-22 military time), late_night is 10pm-6am (22-6military time). Notice that spread is 6hrs, 5hrs, 5hrs, then 8hrs. These are divided in unequal amounts on account of time periods of interest. 
+        result = {'Morning':0, 'Afternoon':0, 'Evening':0, 'Late_night':0}
+        #duration = max(incident_times)-min(incident_times)
+        for item in incident_times:
+            hr = int(item[0:2])
+            mins = int(item[3:5])
+            sec = int(item[6:8])
+            if hr>=6 and hr<=12:
+                if hr==12:
+                    if (mins>0) or (sec>0):
+                        result['Afternoon']+=1
+                        continue
+                result['Morning']+=1
+                continue
+            elif hr>12 and hr<=17:
+                if hr==17:
+                    if (mins>0) or (sec>0):
+                        result['Evening']+=1
+                        continue
+                result['Afternoon']+=1
+                continue
+            #hr>17 or <6
+            else: 
+                result['Late_night']+=1
+                continue
+    else:
+        result = []
+        if timeStep == 'year':
+            for i in range(duration+1):
+                result.append({start_date.year+i:0})
+            for item in incident_dates:
+                for i in range(duration+1):
+                    if (item.year-start_date.year)==i:
+                        result[i][item.year]+=1
+                        continue
+        elif timeStep == 'month':
+            for i in range(duration+1):
+                result.append({start_date.month+i:0})
+            for item in incident_dates:
+                for i in range(duration+1):
+                    if (item.month-start_date.month)==i:
+                        result[i][item.month]+=1
+                        continue
+        else:
+            for i in range(duration+1):
+                result.append({start_date.day+i:0})
+            for item in incident_dates:
+                for i in range(duration+1):
+                    if (item.day-start_date.day)==i:
+                        result[i][item.day]+=1
+                        continue
+    return result
 
 def create_map(jobid):
     """
@@ -265,7 +313,7 @@ def do_work(jobid):
 
     incident_graph = 'Graph not requested'
     if (graph_request == 'yes'):
-        incident_graph = create_graph(jobid)
+        incident_graph = create_chart(jobid)
 
     incident_report = 'Report not requested'
     if (report_request == 'yes'):

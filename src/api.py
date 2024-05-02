@@ -203,12 +203,13 @@ def output_result(jobid):
                 print("Error when saving map to directory:", e)
                 logging.error('Failed to save image\n')
         else:
-            result_report = result_report_test
+            result_map = result_map_test
 
         if result_chart_test != 'Graph not requested':
         #make chart
-            result_chart = ''
-
+            result_chart = f'test chart values: {result_chart_test}\n'
+        else:
+            result_chart = result_chart_test
         #Checking if a report was requested, if so make one
         if result_report_test != 'Report not requested':
             logging.debug('Making incident report\n')
@@ -216,7 +217,7 @@ def output_result(jobid):
         else:
             result_report = result_report_test
         #Compile the computed results into neat output with standardized format
-        return f'{result[0]} \n {result_map} \n{result_report}\n'
+        return f'{result[0]} \n{result_chart}\n {result_map} \n{result_report}\n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
