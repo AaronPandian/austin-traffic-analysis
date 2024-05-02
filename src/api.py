@@ -179,22 +179,25 @@ def output_result(jobid):
         result_map = result[1]
         # Instead of return result, return the list of all information and create output from results here $$$$$$$$$$$$$$$$$$$$$
         if result[1] != 'Map not requested':
+            logging.debug('Attempting to make map\n')
             df = pd.DataFrame(result[1])
             fig = go.Figure()
 
-            fig.add_trace(go.Scattergeo(lon = df['longitudes'], lat = df['latitudes'],text = df['Address'], mode = 'markers', marker = dict(size = 8,opacity = 0.8, reversescale = True, autocolorscale = False, symbol = 'circle', line = dict(width=1, color='rgba(102, 102, 102)'), colorscale = 'Blues', cmin = 0, color = df['latitudes'], cmax = df['latitudes'].max(), colorbar_title = 'Latitude')))
+            fig.add_trace(go.Scattermapbox(lon = df['longitudes'], lat = df['latitudes'],text = df['Address'], mode = 'markers', marker = go.scattermapbox.Marker(size = 8)))
 
-            #fig.update_layout(title = 'Scatter Plot of Locations', geo_scope='usa' )
-            fig.update_geos(center=dict(lon=-99.9018, lat=31.9686), projection_scale=5, scope='usa')
-            fig.show()
-            fig.write_image("scatterplot_map.png", width=800, height=600, scale=2)
-            """
-            map_data = pd.read_json(StringIO(data))#, dtype_backend="numpy_nullable")
-            map_data = map_data.dropna(subset=['latitudes', 'longitudes', 'Address'])
-            fig = px.scatter_geo(map_data, lat='latitudes', lon='longitudes',hover_name='Address', title='Austin Traffic Incidents Map')
-            """
-            result_map = fig.show()
-        return f'{result[0]} \n {result_map}\n'
+            fig.update_layout(title = 'Austin Traffic Incident Map', geo_scope='usa', mapbox_style='open-street-map', mapbox_center={'lat':30.2672, 'lon':-97.7431},mapbox_zoom=10 )
+            fig.update_geos(center=dict(lon=-97.7431, lat=30.2672), projection_scale=10, scope='usa')
+            try: 
+                logging.debug('Attempting to save map\n')
+                curr_dir = os.path.abspath(os.getcwd())
+                filename = 'Austin_Incident_Map.png'
+                result_map = os.path.join(curr_dir, filename)
+                fig.write_image(result_map, width=800, height=600, scale=2)
+                logging.debug('Image saved\n')
+            except Exception as e:
+                print("Error when saving map to directory:", e)
+                logging.error('Failed to save image\n')
+        return f'{result[0]} \n Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:/app/{result_map}\n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
