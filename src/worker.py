@@ -181,7 +181,7 @@ def create_regional_report(jobid):
             elif abs(lon)-abs(Downtown_Austin[1]) > 0.01:
                 rel_lon[index] = 'West'
         for index, lat in enumerate(rel_lat):
-            lon = rel_lon[i]
+            lon = rel_lon[index]
             if (lat=='Same') and (lon=='Same'):
                 cDowntown+=1
             elif lat=='North':

@@ -52,7 +52,7 @@ Once the image is running, the terminal will wait for requests to be made using 
 Additionally, the following commands can run job requests for more intensive operations. 
 
 * A POST request to `/jobs` queues a new job with a unique ID. The worker script will then return summary statistics for traffic incidents between a specified date range. 
-    * The command will look like `curl localhost:5000/jobs -X POST -d '{"start":"01/15/2022", "end":"01/15/2023","incident_map":"yes","incident_graph":"yes","incident_report":"yes"}' -H "Content-Type: application/json"`. The string date range is denoted within the curly brackets. 
+    * The command will look like `curl localhost:5000/jobs -X POST -d '{"start":"01/15/2022", "end":"01/15/2022","incident_map":"yes","incident_graph":"yes","incident_report":"yes"}' -H "Content-Type: application/json"`. The string date range is denoted within the curly brackets. 
     * The job **must** be formatted by issuing a start date that occurs before the end date. Furthermore, the format of dates **must** match the example command- days and months are 2 digits (i.e. 01, 15, 12), and years are 4 digits (i.e. 2021, 2023, 2024), separated by some character. Dates should not be before November 2020 or after the present day, since that is the expanse of the dataset. 
 * A GET request to `/jobs` returns a list of all queued job IDs.
     * The command will look like `curl <URL>/jobs`.
@@ -119,11 +119,14 @@ Here, the output is a large list- shortened for this example.
   }
 ]
 ```
-##### `curl localhost:5000/jobs -X POST -d '{"start":"01/15/2022", "end":"01/15/2023","incident_map":"yes","incident_graph":"yes","incident_report":"yes"}' -H "Content-Type: application/json"`
+##### `curl localhost:5000/jobs -X POST -d '{"start":"01/15/2022", "end":"01/15/2022","incident_map":"yes","incident_graph":"yes","incident_report":"yes"}' -H "Content-Type: application/json"`
 ```
 {
-  "end": "01/15/2023",
+  "end": "01/15/2022",
   "id": "c76b37b2-250d-4894-afe5-6d81d7c8475a",
+  "incident_map": "yes",
+  "incident_graph": "yes",
+  "incident_report": "yes",
   "start": "01/15/2022",
   "status": "submitted"
 }
