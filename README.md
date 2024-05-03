@@ -8,7 +8,7 @@ Published by the local government of Austin are traffic incidents compiled by th
 This folder contains a **Dockerfile** and **requirements.txt** file, which holds library dependencies of the code, allowing the user to create and run an API image. Furthermore, the **docker-compose.yaml** file provides a swift method to build said image. The source code folder consists of a main script **api.py** hosting the web application functions- returning analytical information from the HGNC dataset online. This code utilizes the **jobs.py** and **worker.py** files to run job requests that indicate more complex, lengthy data analysis. 
 
 ## Diagram Overview
-![Alt text](https://github.com/AaronPandian/coe323-homeworks/blob/main/homework08/diagram.png)
+![Alt text](https://github.com/AaronPandian/austin-traffic-analysis/blob/main/SoftwareDiagram.png)
 This software diagram presents a visual of the concurrency and relationship between the files in this repository and what they interact 
 with that may be "hidden."
 
