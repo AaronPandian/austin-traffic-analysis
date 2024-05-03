@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: traffic-prod-worker-deployment
+  name: traffic-prod-api-deployment
   labels:
     app: traffic-flask-app
 spec:
@@ -18,7 +18,10 @@ spec:
       containers:
         - name: traffic-flask-app
           imagePullPolicy: Always
-          image: "aaron-p/traffic-app:1.0"
+          image: aaronpandian1/traffic-api:1.0
+          env:
+          - name: REDIS_IP
+            value: "10.233.50.252"
           ports:
           - name: http
             containerPort: 5000
