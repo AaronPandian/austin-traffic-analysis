@@ -199,7 +199,7 @@ def output_result(jobid):
                 map_path = os.path.join(curr_dir, filename)
                 fig.write_image(map_path, width=800, height=600, scale=2)
                 logging.debug('Image saved\n')
-                result_map = f'Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:{map_path} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
+                result_map = f'Find incident map by copying from container using this command: "docker cp <insert container ID for api>:{map_path} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
             except Exception as e:
                 print("Error when saving map to directory:", e)
                 logging.error('Failed to save image\n')
@@ -221,7 +221,7 @@ def output_result(jobid):
                 curr_dir = os.path.abspath(os.getcwd())
                 filename = 'Incident_Chart.png'
                 map_path = os.path.join(curr_dir, filename)
-                result_chart = f'Find incident chart by copying from container using this command: "docker cp <insert continer ID for api>:{map_path} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
+                result_chart = f'Find incident chart by copying from container using this command: "docker cp <insert container ID for api>:{map_path} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
                 logging.debug('Finished making and saving chart\n')
             except Exception as e:
                 print("Error when saving chart to directory:", e)

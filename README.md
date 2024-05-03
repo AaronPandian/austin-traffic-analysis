@@ -134,19 +134,22 @@ Here, the output is a large list- shortened for this example.
 ##### `curl localhost:5000/jobs/c76b37b2-250d-4894-afe5-6d81d7c8475a`
 ```
 {
-  "end": "01/15/2023",
+  "end": "01/15/2022",
   "id": "c76b37b2-250d-4894-afe5-6d81d7c8475a",
+  "incident_map": "yes",
+  "incident_graph": "yes",
+  "incident_report": "yes",
   "start": "01/15/2022",
-  "status": "in progress"
+  "status": "submitted"
 }
 ```
 ##### `curl localhost:5000/results/c76b37b2-250d-4894-afe5-6d81d7c8475a`
 ```
 The average incident location is at (30.313467875739622N, -97.73633102366863W), and there were 169 incidents during this period.
 
-Find incident chart by copying from container using this command: "docker cp <insert continer ID for api>:/app/Incident_Chart.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
+Find incident chart by copying from container using this command: "docker cp <insert container ID for api>:/app/Incident_Chart.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
 
-Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:/app/Austin_Incident_Map.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
+Find incident map by copying from container using this command: "docker cp <insert container ID for api>:/app/Austin_Incident_Map.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
 
 This is the accident distribution for each region of austin(in the format of 'Region': <#incidents>):
  {'Downtown': 9, 'North': 6, 'NE': 62, 'NW': 30, 'East': 2, 'West': 3, 'South': 6, 'SW': 30, 'SE': 21}
