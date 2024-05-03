@@ -51,7 +51,8 @@ def create_summary(jobid):
             invalid_pt_count = 0
             if (start_date <= incident_date and incident_date <= end_date):
                 # Append the locations to the lists
-                if incident['Latitude'] == '' or incident['Latitude'] == '':                    continue
+                if incident['Latitude'] == '' or incident['Latitude'] == '':
+                    continue
                 elif float(incident['Latitude'])>50 or float(incident['Latitude'])<10:
                     continue
                 elif abs(float(incident['Longitude']))>120 or abs(float(incident['Longitude']))<70:
@@ -226,7 +227,8 @@ def create_map(jobid):
             invalid_pt_count =0
             if (start_date <= incident_date and incident_date <= end_date):
                 #Append data to list
-                if incident['Latitude'] == '' or incident['Latitude'] == '':                    continue
+                if incident['Latitude'] == '' or incident['Latitude'] == '':
+                    continue
                 elif float(incident['Latitude'])>50 or float(incident['Latitude'])<10:
                     continue
                 elif abs(float(incident['Longitude']))>120 or abs(float(incident['Longitude']))<70:

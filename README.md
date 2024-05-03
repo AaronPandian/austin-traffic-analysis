@@ -157,7 +157,13 @@ Note that for this output, the job request was posted to request a report,
 graphic from the app container to the local directory of interest following
  the instructions from the output. May need to use 'docker ps -a' first to 
 see the container id for the api (not the worker or redis), which will be 
-needed to docker cp the image on linux. 
+needed to docker cp the image on linux. Also note that for the chart image,
+the x-axis label is "Date/Time" as it is relative to the queried job 
+timeframe (over several years, if the start and end year are the same then 
+over months of that year, otherwise if the start and end year and month are
+ the same then over the days in that month; otherwise if the start and end 
+year, month, and day are the same, over the time (hours) of that day.
+
 ##### `curl localhost:5000/help`
 ```
 Note that for all the route endpoints, they build off of the base url (either 'localhost:5000/' or 'http://127.0.0.1:5000/'). As such, for a route, say '/data', the final url to curl could be 'localhost:5000/data' plus the desired method.
@@ -170,3 +176,5 @@ The '/jobs' route has 'POST' and 'GET' methods to post a job request and view th
 
 The '/results/<desired_id>' route has a 'GET' method that attmepts to compute results for a desired job id, <desired_id>, then displays these results. Note that if a chart or map is requested, it will be saved to the container on which the app is run, and can later be retrieved with a docker cp request (if on linux) to download to the local working directory.
 ```
+
+
