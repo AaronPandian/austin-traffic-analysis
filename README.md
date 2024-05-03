@@ -140,3 +140,33 @@ Here, the output is a large list- shortened for this example.
   "status": "in progress"
 }
 ```
+##### `curl localhost:5000/results/c76b37b2-250d-4894-afe5-6d81d7c8475a`
+```
+The average incident location is at (30.313467875739622N, -97.73633102366863W), and there were 169 incidents during this period.
+
+Find incident chart by copying from container using this command: "docker cp <insert continer ID for api>:/app/Incident_Chart.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
+
+Find incident map by copying from container using this command: "docker cp <insert continer ID for api>:/app/Austin_Incident_Map.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
+
+This is the accident distribution for each region of austin(in the format of 'Region': <#incidents>):
+ {'Downtown': 9, 'North': 6, 'NE': 62, 'NW': 30, 'East': 2, 'West': 3, 'South': 6, 'SW': 30, 'SE': 21}
+Note that downtown is defined as 30.2672 N (+- 0.01 degrees), -97.7431 W (+-0.01 degrees). Also note that the other regions are relative to downtown. For example, 'North' Austin is 30.2772 N (or greater), and -97.7431 W (+-0.01 degrees).
+```
+Note that for this output, the job request was posted to request a report,
+ chart, and map. Also, to view the chart and map, simply download the 
+graphic from the app container to the local directory of interest following
+ the instructions from the output. May need to use 'docker ps -a' first to 
+see the container id for the api (not the worker or redis), which will be 
+needed to docker cp the image on linux. 
+##### `curl localhost:5000/help`
+```
+Note that for all the route endpoints, they build off of the base url (either 'localhost:5000/' or 'http://127.0.0.1:5000/'). As such, for a route, say '/data', the final url to curl could be 'localhost:5000/data' plus the desired method.
+
+The '/data' route has 'GET', 'POST', and 'DELETE' methods that can be used to load in the data, view the loaded data, and delete the data from the redis database server
+
+The '/ids' route has a 'GET' method that is used to list all of the unique traffic incident report IDs. If the information for a specific traffic id is desired, it can be viewed by querying the desired id to the end, like so for example <desired_id>: '/ids/<desired_id>'.
+
+The '/jobs' route has 'POST' and 'GET' methods to post a job request and view the details of all exisiting job requests respetively. Note that if a specific job ID's details are desired, they can be queried with a 'GET' method. For example, with an example job id of <ex_job_id>, the specifics for this job id can be displayed with '/jobs/<ex_job_id>'.
+
+The '/results/<desired_id>' route has a 'GET' method that attmepts to compute results for a desired job id, <desired_id>, then displays these results. Note that if a chart or map is requested, it will be saved to the container on which the app is run, and can later be retrieved with a docker cp request (if on linux) to download to the local working directory.
+```
