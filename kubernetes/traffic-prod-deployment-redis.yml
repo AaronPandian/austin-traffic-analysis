@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-prod-redis-deployment
+  labels:
+    app: traffic-pvc-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffic-pvc-app
+  template:
+    metadata:
+      labels:
+        app: traffic-pvc-app
+    spec:
+      containers:
+        - name: traffic-data-container
+          image: redis:7
+          command: ['sh', '-c', 'echo "Hello, Kubernetes!" >> /data/out.txt\
+ && sleep 3600']
+          volumeMounts:
+          - name: traffic-aaron-p-data
+            mountPath: "/data"
+      volumes:
+      - name: traffic-aaron-p-data
+        persistentVolumeClaim:
+          claimName: traffic-aaron-p-data
