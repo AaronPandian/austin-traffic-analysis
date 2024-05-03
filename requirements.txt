@@ -8,3 +8,4 @@ pytest==8.0.1
 plotly
 pandas
 kaleido
+matplotlib

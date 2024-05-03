@@ -137,8 +137,22 @@ def create_chart(jobid):
             else: 
                 result['Late_night']+=1
                 continue
+        """
+        result_chart = []
+        for i in range(len(result)):
+            for n, item in enumerate(result):
+                if n==i:
+                    result_chart.append({item:result[item]})
+                    break
+        """
+        result_chart = {}
+        for key, val in result.items():
+            result_chart[key] = [val]
+        return result_chart    
     else:
         result = []
+        #result_chart = []
+        result_chart = {}
         if timeStep == 'year':
             for i in range(duration+1):
                 result.append({start_date.year+i:0})
@@ -163,7 +177,11 @@ def create_chart(jobid):
                     if (item.day-start_date.day)==i:
                         result[i][item.day]+=1
                         continue
-    return result
+        for dict_elem in result:
+            for key, val in dict_elem.items():
+                result_chart.setdefault(key, []).append(val)
+        #result_chart = result
+        return result_chart
 
 def create_map(jobid):
     """
@@ -174,7 +192,7 @@ def create_map(jobid):
         jobid (string): Unique job ID
 
     Returns:
-        result (dictionary): Dictionary of lists with information to create
+        result_map (dictionary): Dictionary of lists with information to create
                              the incident map.
     """
     job = get_job_by_id(jobid)
@@ -198,8 +216,8 @@ def create_map(jobid):
                 incident_longitudes.append(float(incident['Longitude']))
                 incident_addresses.append(str(incident['Address']))
         logging.debug('Worker finished analysis')
-        result = {'latitudes':incident_latitudes, 'longitudes': incident_longitudes, 'Address': incident_addresses}
-        return result 
+        result_map = {'latitudes':incident_latitudes, 'longitudes': incident_longitudes, 'Address': incident_addresses}
+        return result_map 
     except TypeError:
         logging.warning('Worker could not initialize dates correctly')
         post_result(jobid, 'Data processing was unsuccessful')

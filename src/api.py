@@ -13,6 +13,7 @@ import logging
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Global variables/constants
 app = Flask(__name__)
@@ -204,20 +205,39 @@ def output_result(jobid):
                 logging.error('Failed to save image\n')
         else:
             result_map = result_map_test
-
         if result_chart_test != 'Graph not requested':
-        #make chart
-            result_chart = f'test chart values: {result_chart_test}\n'
+            logging.debug('Attempting to make dataframe\n')
+            df = pd.DataFrame(result[2])
+            logging.debug('Attempt melt data\n')
+            df_melted = df.melt(var_name='Date/Time', value_name = 'Total Incident Count')
+            df_clean = df_melted.dropna()
+            logging.debug('Attempting to make chart\n')
+            plt.figure()
+            ax = df_clean.plot(kind='bar', x='Date/Time', y='Total Incident Count', legend=None)
+            plt.ylabel('Total Incident Count')
+            try:
+                logging.debug('Attempting to save chart\n')
+                plt.savefig('Incident_Chart.png', bbox_inches='tight')
+                curr_dir = os.path.abspath(os.getcwd())
+                filename = 'Incident_Chart.png'
+                map_path = os.path.join(curr_dir, filename)
+                result_chart = f'Find incident chart by copying from container using this command: "docker cp <insert continer ID for api>:{map_path} <path to desired local folder, use \'.\' if the current local working directory is the designated location>" \n'
+                logging.debug('Finished making and saving chart\n')
+            except Exception as e:
+                print("Error when saving chart to directory:", e)
+                logging.error('Failed to save image\n')
         else:
             result_chart = result_chart_test
         #Checking if a report was requested, if so make one
         if result_report_test != 'Report not requested':
             logging.debug('Making incident report\n')
             result_report =  f'This is the accident distribution for each region of austin(in the format of \'Region\': <#incidents>):\n {result_report_test}\nNote that downtown is defined as 30.2672 N (+- 0.01 degrees), -97.7431 W (+-0.01 degrees). Also note that the other regions are relative to downtown. For example, \'North\' Austin is 30.2772 N (or greater), and -97.7431 W (+-0.01 degrees).\n'
+            logging.debug('Finished making report\n')
         else:
             result_report = result_report_test
         #Compile the computed results into neat output with standardized format
-        return f'{result[0]} \n{result_chart}\n {result_map} \n{result_report}\n'
+        logging.debug('Compiling results \n')
+        return f'{result[0]} \n{result_chart} \n{result_map} \n{result_report} \n'
     else:
         logging.warning('The job has not finished yet')
         return 'Your data is still being analyzed and calculated\n'
