@@ -18,12 +18,11 @@ spec:
       containers:
         - name: traffic-data-container
           image: redis:7
-          command: ['sh', '-c', 'echo "Hello, Kubernetes!" >> /data/out.txt\
- && sleep 3600']
+          command: ['sh', '-c', 'echo "Hello, Kubernetes!" >> /data/out.txt && sleep 3600']
           volumeMounts:
-          - name: traffic-aaron-p-data
+          - name: traffic-aaronpandian1-data
             mountPath: "/data"
       volumes:
-      - name: traffic-aaron-p-data
+      - name: traffic-aaronpandian1-data
         persistentVolumeClaim:
-          claimName: traffic-aaron-p-data
+          claimName: traffic-aaronpandian1-data
