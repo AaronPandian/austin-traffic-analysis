@@ -48,10 +48,22 @@ def create_summary(jobid):
             data_date = incident['Published Date']
             incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
             #start_date = date(int(start[6:10]), int(start[0:2]), int(start[3:5])) # Year(4)/Month(2)/Day(2) add space at end.
+            invalid_pt_count = 0
             if (start_date <= incident_date and incident_date <= end_date):
                 # Append the locations to the lists
-                incident_latitudes.append(float(incident['Latitude']))
-                incident_longitudes.append(float(incident['Longitude']))
+                if float(incident['Latitude'])>50 or float(incident['Latitude'])<10:
+                    continue
+                elif abs(float(incident['Longitude']))>120 or abs(float(incident['Longitude']))<70:
+                    continue
+                else:
+                    try:
+                        incident_latitudes.append(float(incident['Latitude']))
+                        incident_longitudes.append(float(incident['Longitude']))
+                    except ValueError:
+                        invalid_pt_count+=1
+                        logging.error(f'Skipped {invalid_pt_count} points due to missing longitude or latitude data\n')
+                        print('Found an invalid data point with either invalid latitude or longitude\n')
+                        continue
         logging.debug('Worker finished analysis')
         lonavg = sum(incident_longitudes)/len(incident_longitudes)
         latavg = sum(incident_latitudes)/len(incident_latitudes)
@@ -210,11 +222,23 @@ def create_map(jobid):
             #Check if data is valid (inside job timeframe)
             data_date = incident['Published Date']
             incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
+            invalid_pt_count =0
             if (start_date <= incident_date and incident_date <= end_date):
                 #Append data to list
-                incident_latitudes.append(float(incident['Latitude']))
-                incident_longitudes.append(float(incident['Longitude']))
-                incident_addresses.append(str(incident['Address']))
+                if float(incident['Latitude'])>50 or float(incident['Latitude'])<10:
+                    continue
+                elif abs(float(incident['Longitude']))>120 or abs(float(incident['Longitude']))<70:
+                    continue
+                else:
+                    try: 
+                        incident_latitudes.append(float(incident['Latitude']))
+                        incident_longitudes.append(float(incident['Longitude']))
+                        incident_addresses.append(str(incident['Address']))
+                    except ValueError:
+                        invalid_pt_count+=1
+                        logging.error(f'Skipped {invalid_pt_count} points due to missing longitude, latitude, or address data\n')
+                        print('Found an invalid data point with either invalid latitude, longitude, or address\n')
+                        continue
         logging.debug('Worker finished analysis')
         result_map = {'latitudes':incident_latitudes, 'longitudes': incident_longitudes, 'Address': incident_addresses}
         return result_map 
@@ -261,10 +285,22 @@ def create_regional_report(jobid):
             #Check if data is valid (inside job timeframe)
             data_date = incident['Published Date']
             incident_date = date(int(data_date[6:10]), int(data_date[0:2]), int(data_date[3:5]))
+            invalid_pt_count = 0
             if (start_date <= incident_date and incident_date <= end_date):
                 #Append data to list
-                incident_latitudes.append(float(incident['Latitude']))
-                incident_longitudes.append(float(incident['Longitude']))
+                if float(incident['Latitude'])>50 or float(incident['Latitude'])<10:
+                    continue
+                elif abs(float(incident['Longitude']))>120 or abs(float(incident['Longitude']))<70:
+                    continue
+                else:
+                    try:
+                        incident_latitudes.append(float(incident['Latitude']))
+                        incident_longitudes.append(float(incident['Longitude']))
+                    except ValueError:
+                        invalid_pt_count+=1
+                        logging.error(f'Skipped {invalid_pt_count} points due to missing longitude or latitude data\n')
+                        print('Found an invalid data point with either invalid latitude or longitude\n')
+                        continue
         rel_lat = ['Same']*len(incident_latitudes)
         for index,lat in enumerate(incident_latitudes):
             if lat-Downtown_Austin[0] > 0.01:
