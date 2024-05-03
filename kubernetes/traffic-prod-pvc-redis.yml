@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: traffic-aaron-p-data
+  name: traffic-aaronpandian1-data
 spec:
   accessModes:
     - ReadWriteOnce
