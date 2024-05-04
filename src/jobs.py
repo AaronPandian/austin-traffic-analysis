@@ -7,16 +7,13 @@ from hotqueue import HotQueue
 import logging
 import os
 
-_redis_ip='redis-db'
-_redis_port='6379'
+env_var = os.environ.get('REDIS_IP')
+rd = redis.Redis(host=env_var, port=6379, db=0)
+q = HotQueue("queue", host=env_var, port=6379, db=1)
+jdb = redis.Redis(host=env_var, port=6379, db=2)
+results = redis.Redis(host=env_var, port=6379, db=3)
 
-rd = redis.Redis(host=_redis_ip, port=6379, db=0)
-q = HotQueue("queue", host=_redis_ip, port=6379, db=1)
-jdb = redis.Redis(host=_redis_ip, port=6379, db=2)
-results = redis.Redis(host=_redis_ip, port=6379, db=3)
-
-env_var = os.environ.get('REDIS_IP', _redis_ip)
-log_var = os.environ.get('LOG_LEVEL', 'DEBUG') # set in docker-compose
+log_var = os.environ.get('LOG_LEVEL', 'DEBUG')
 logging.basicConfig(level=log_var)
 
 def _generate_jid():
