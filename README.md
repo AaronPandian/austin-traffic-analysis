@@ -52,7 +52,9 @@ kubectl apply -f traffic-prod-deployment-worker.yml
 kubectl apply -f traffic-prod-service-nodeport-flask.yml
 kubectl apply -f traffic-prod-ingress-flask.yml
 ```
-With each command, a print statement "completed" will deem a successful run. Once the cluster is in place and all three pods are running, which you can verify using `kubectl get pods`, run `kubectl get ingress`. This will provide a specialized link from which you can call the application routes from a public endpoint. Copy this link and use it as the `<URL>` for curling the routes below. 
+With each command, a print statement "completed" will deem a successful run. Once the cluster is in place and all three pods are running, which you can verify using `kubectl get pods`, run `kubectl get ingress`. This will provide a specialized link from which you can call the application routes from a **public** endpoint. Copy this link and use it as the `<URL>` for curling the routes below. 
+
+It is important to note that the post and get requests for the entire dataset take a long time and can sometimes cause a Gateway Time-out. As a result, before you run the `kubectl apply -f traffic-prod-ingress-flask.yml` from the steps above, run `kubectl get services` to get the unique port number from the generated nodeport (can look like this 5000:32627/TCP where the 32627 is the number we want). Copy the port number and run `curl -X POST coe332.tacc.cloud:<port number>/data` to post the traffic incident data to Redis. Conduct longer routes like this if they give you trouble in the preceding steps with the public URL. After conducting this, generate the public URL by running the ingress file for application use elsewhere. 
 
 ## Accessing Routes
 Once the image is running, the terminal will wait for requests to be made using specific URL routes. Using the provided URL, paste the URL and append the following routes at the end of the URL to obtain the desired functions. 
