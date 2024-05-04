@@ -9,8 +9,8 @@ This folder contains a **Dockerfile** and **requirements.txt** file, which holds
 
 ## Diagram Overview
 ![Alt text](https://github.com/AaronPandian/austin-traffic-analysis/blob/main/SoftwareDiagram.png)
-This software diagram presents a visual of the concurrency and relationship between the files in this repository and what they interact 
-with that may be "hidden."
+
+This software diagram presents a visual of the concurrency and relationship between the files in this repository and what they interact with that may be "hidden."
 
 ## About and Access to the Data
 The traffic incident data this code requests can be found on the [Government Data Website](https://catalog.data.gov/dataset/real-time-traffic-incident-reports/resource/e9a86b8c-2b7f-4921-8f25-cfdac2202f2a). The data is stated to be updated every five minutes and is provided in JSON, CSV, XML, and RDF file formats- as seen on the website. In addition, the history of the reports dates back to November 12, 2020. The government has posted [summary statistics](https://data.austintexas.gov/stories/s/48n7-m3me) of their own and a [map of the reports](https://data.austintexas.gov/stories/s/Austin-Travis-County-Traffic-Report-Page/9qfg-4swh/). This will be used as a reference but will not be used for our data analysis.
