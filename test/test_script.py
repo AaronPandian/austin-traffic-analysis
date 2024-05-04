@@ -83,10 +83,6 @@ def test_submit_job(client):
 
 def test_get_job():
     # Testing truths to validate the get_job funciton, depends on generated UUID
-    #response = client.get('/jobs/<insert generated id>')
-    #jobBytes = response.data
-    #job = jobBytes.decode('utf8')
-    #assert isinstance(jobs, str) == True
     assert response4.status_code == 200
     assert isinstance(response4.data.decode('utf8'), str or list)==True
     test_jid = get_job_ids()[0]
@@ -94,10 +90,6 @@ def test_get_job():
 
 def test_output_result():
     # Testing truths to validate the output_result funciton, depends on generated UUID
-    #response = client.get('/results/<insert generated id>')
-    #resultBytes = response.data
-    #result = resultBytes.decode('utf8')
-    #assert isinstance(result, str) == True
     test_jid = get_job_ids()[0]
     response5 = request.get('http://127.0.0.1:5000/results/'+test_jid)
     assert response5.status_code == 200
@@ -107,7 +99,7 @@ def test_help():
     assert response6.status_code == 200
     assert isinstance(response6.data.decode('utf8'), str) ==True
     
-#Test Worker functionality
+# WORKER FUNCTIONS
 def test_worker():
     assert(isinstance(do_work(test_jid)), None) == True
 
@@ -116,10 +108,14 @@ def unit_test():
     Run all unit test functions.
     """
     # Job function tests
-    #test_get_result()
     test_jobs()
-    # Route function tests
-        # main check is to verify the route works, not the return
+    
+    # Main checks are for if the route is working
+    test_handle_data()
+    test_get_ids()
+    test_get_job()
+
+    # Checks return given the correct environment 
     """
     test_handle_data(client=client)
     test_handle_data(client=client)
@@ -127,16 +123,9 @@ def unit_test():
     test_submit_job(client=client)
     test_output_result()
     test_help()
-
     """
-    test_handle_data()
-    test_get_ids()
-    test_get_job()
-
-    #test_get_job(client=client)
-
+    
     # Worker function test
-    #test_output_result(client=client)
     test_worker()
 
 if __name__ == '__test_api__':
