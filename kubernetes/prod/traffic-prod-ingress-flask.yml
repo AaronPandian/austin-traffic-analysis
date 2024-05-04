@@ -15,6 +15,6 @@ spec:
           path: "/"
           backend:
             service:
-              name: traffic-flask-nodeport-service
+              name: traffic-prod-flask-nodeport-service
               port:
                   number: 5000
