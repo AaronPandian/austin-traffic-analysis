@@ -13,7 +13,7 @@ import plotly.express as px
 import pandas as pd
 
 # Global variables / constants
-log_var = os.environ.get('LOG_LEVEL', 'DEBUG') # set in docker-compose
+log_var = os.environ.get('LOG_LEVEL', 'DEBUG') 
 logging.basicConfig(level=log_var)
 
 # Function definitions
