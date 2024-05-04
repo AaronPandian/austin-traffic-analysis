@@ -55,7 +55,7 @@ kubectl apply -f traffic-prod-ingress-flask.yml
 With each command, a print statement "completed" will deem a successful run. Once the cluster is in place and all three pods are running, which you can verify using `kubectl get pods`, run `kubectl get ingress`. This will provide a specialized link from which you can call the application routes from a public endpoint. Copy this link and use it as the `<URL>` for curling the routes below. 
 
 ## Accessing Routes
-Once the image is running, the terminal will wait for requests to be made using specific URL routes. Using the HTTPS URL displayed in the terminal (you can use `localhost:5000` if you executed it in the background), paste the URL and append the following routes at the end of the URL to obtain the desired functions. 
+Once the image is running, the terminal will wait for requests to be made using specific URL routes. Using the provided URL, paste the URL and append the following routes at the end of the URL to obtain the desired functions. 
 
 * A POST request to `/data` loads the traffic data to a Redis database.
     * The command will look like `curl -X POST <URL>/data`.
