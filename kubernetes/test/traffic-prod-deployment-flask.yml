@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: traffic-prod-api-deployment
+  name: traffic-test-api-deployment
   labels:
     app: traffic-flask-app
 spec:
