@@ -5,7 +5,7 @@
 Published by the local government of Austin are traffic incidents compiled by the Combined Transportation, Emergency, and Communications Center (CTECC). The data is primarily segmented into the location of occurrence, date and time of the incident, the type of report, and the filing agency. In this project, traffic information is populated into a Redis database through a Flask interface to enable in-depth data analysis for a user to conduct. Further capability is provided by job scheduling to allow the user to request analyses that require greater compiling time. This application is encapsulated within Kubernetes which allows the user to conduct said data-analysis in various environments. 
 
 ### Files
-This folder contains a **Dockerfile** and **requirements.txt** file, which holds library dependencies of the code. Furthermore, the **docker-compose.yaml** file provides a swift method to build the necessary images. The source code folder consists of a main script **api.py** hosting the web application functions- returning analytical information from the traffic incident dataset online. This code utilizes the **jobs.py** and **worker.py** files to run job requests that indicate more complex, lengthy data analysis. A test folder holding the unit test script **test_script.py** provides a method to ensure the core functions work as they should. Lastly, the **kubernetes** directory holds the code two folders, one for testing **test** and one for normal use case **prod**. The files of each variation are the same- but allow different use cases for the user. The specific code is described in more detail in the video, linked in the next section. 
+This folder contains a **Dockerfile** and **requirements.txt** file, which holds library dependencies of the code. Furthermore, the **docker-compose.yaml** file provides a swift method to build the necessary images. The source code folder consists of a main script **api.py** hosting the web application functions- returning analytical information from the traffic incident dataset online. This code utilizes the **jobs.py** and **worker.py** files to run job requests that indicate more complex, lengthy data analysis. A test folder holding the unit test script **test_script.py** provides a method to ensure the core functions work as they should. Lastly, the **kubernetes** directory holds the code in two folders, one for testing **test** and one for normal use case **prod**. The files of each variation are the same- but allow different use cases for the user. The specific code is described in more detail in the video, linked in the next section. 
 
 ## Diagram Overview
 ![Alt text](https://github.com/AaronPandian/austin-traffic-analysis/blob/main/SoftwareDiagram.png)
@@ -52,7 +52,7 @@ kubectl apply -f traffic-prod-deployment-worker.yml
 kubectl apply -f traffic-prod-service-nodeport-flask.yml
 kubectl apply -f traffic-prod-ingress-flask.yml
 ```
-With each command, a print statement "completed" will deem a successful run. Once the cluster is in place and all three pods are running, which you can verify using `kubectl get pods`, run `kubectl get ingress`. This will provide a specialized link from which you can call the application routes from a **public** endpoint. Copy this link and use it as the `<URL>` for curling the routes below. 
+With each command, a print statement "completed" will deem a successful run. Once the cluster is in place and all three pods are running, you can verify using `kubectl get pods`, run `kubectl get ingress`. This will provide a specialized link from which you can call the application routes from a **public** endpoint. Copy this link and use it as the `<URL>` for curling the routes below. 
 
 It is important to note that the post and get requests for the entire dataset take a long time and can sometimes cause a Gateway Time-out. As a result, before you run the `kubectl apply -f traffic-prod-ingress-flask.yml` from the steps above, run `kubectl get services` to get the unique port number from the generated nodeport (can look like this 5000:32627/TCP where the 32627 is the number we want). Copy the port number and run `curl -X POST coe332.tacc.cloud:<port number>/data` to post the traffic incident data to Redis. Conduct longer routes like this if they give you trouble in the preceding steps with the public URL. After conducting this, generate the public URL by running the ingress file for application use elsewhere. 
 
@@ -172,23 +172,24 @@ Find incident chart by copying from container using this command: "docker cp <in
 
 Find incident map by copying from container using this command: "docker cp <insert container ID for api>:/app/Austin_Incident_Map.png <path to desired local folder, use '.' if the current local working directory is the designated location>"
 
-This is the accident distribution for each region of austin(in the format of 'Region': <#incidents>):
+This is the accident distribution for each region of Austin (in the format of 'Region': <#incidents>):
  {'Downtown': 9, 'North': 6, 'NE': 62, 'NW': 30, 'East': 2, 'West': 3, 'South': 6, 'SW': 30, 'SE': 21}
-Note that downtown is defined as 30.2672 N (+- 0.01 degrees), -97.7431 W (+-0.01 degrees). Also note that the other regions are relative to downtown. For example, 'North' Austin is 30.2772 N (or greater), and -97.7431 W (+-0.01 degrees).
+
+Downtown is defined as 30.2672 N (+- 0.01 degrees), -97.7431 W (+-0.01 degrees). The other regions are relative to downtown. For example, 'North' Austin is 30.2772 N (or greater), and -97.7431 W (+-0.01 degrees).
 ```
-Note that for this output, the job request was posted to request a report, chart, and map. Also, to view the chart and map, simply download the graphic from the app container to the local directory of interest following the instructions from the output. May need to use 'docker ps -a' first to see the container ID for the API (not the worker or redis), which will be needed to docker cp the image on linux. Also note that for the chart image, the x-axis label is "Date/Time" as it is relative to the queried job timeframe (over several years, if the start and end year are the same then over months of that year, otherwise if the start and end year and month are the same then over the days in that month; otherwise if the start and end year, month, and day are the same, over the time (hours) of that day.
+For this output, the job request was posted to request a report, chart, and map. Also, to view the chart and map, simply download the graphic from the app container to the local directory of interest following the instructions from the output. May need to use 'docker ps -a' first to see the container ID for the API (not the worker or Redis), which will be needed to docker cp the image on Linux. Also note that for the chart image, the x-axis label is "Date/Time" as it is relative to the queried job timeframe (over several years, if the start and end year are the same then over months of that year if the start and end year and month are the same then over the days in that month; otherwise if the start and end year, month, and day are the same, over the time (hours) of that day.
 
 ##### `curl localhost:5000/help`
 ```
-Note that for all the route endpoints, they build off of the base url (either 'localhost:5000/' or 'http://127.0.0.1:5000/'). As such, for a route, say '/data', the final url to curl could be 'localhost:5000/data' plus the desired method.
+Note that for all the route endpoints, they build off of the base URL (either 'localhost:5000/' or 'http://127.0.0.1:5000/'). As such, for a route, say '/data', the final URL to curl could be 'localhost:5000/data' plus the desired method.
 
-The '/data' route has 'GET', 'POST', and 'DELETE' methods that can be used to load in the data, view the loaded data, and delete the data from the redis database server
+The '/data' route has 'GET', 'POST', and 'DELETE' methods that can be used to load the data, view the loaded data, and delete the data from the Redis database server
 
-The '/ids' route has a 'GET' method that is used to list all of the unique traffic incident report IDs. If the information for a specific traffic id is desired, it can be viewed by querying the desired id to the end, like so for example <desired_id>: '/ids/<desired_id>'.
+The '/ids' route has a 'GET' method that is used to list all of the unique traffic incident report IDs. If the information for a specific traffic ID is desired, it can be viewed by querying the desired id to the end, like so, for example, <desired_id>: '/ids/<desired_id>'.
 
-The '/jobs' route has 'POST' and 'GET' methods to post a job request and view the details of all exisiting job requests respetively. Note that if a specific job ID's details are desired, they can be queried with a 'GET' method. For example, with an example job id of <ex_job_id>, the specifics for this job id can be displayed with '/jobs/<ex_job_id>'.
+The '/jobs' route has 'POST' and 'GET' methods to post a job request and view the details of all existing job requests respectively. Note that if a specific job ID's details are desired, they can be queried with a 'GET' method. For example, with an example job id of <ex_job_id>, the specifics for this job id can be displayed with '/jobs/<ex_job_id>'.
 
-The '/results/<desired_id>' route has a 'GET' method that attmepts to compute results for a desired job id, <desired_id>, then displays these results. Note that if a chart or map is requested, it will be saved to the container on which the app is run, and can later be retrieved with a docker cp request (if on linux) to download to the local working directory.
+The '/results/<desired_id>' route has a 'GET' method that attempts to compute results for a desired job id, <desired_id>, then displays these results. Note that if a chart or map is requested, it will be saved to the container on which the app is run, and can later be retrieved with a docker cp request (if on Linux) to download to the local working directory.
 ```
 
 
