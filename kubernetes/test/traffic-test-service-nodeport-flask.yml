@@ -2,7 +2,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-    name: traffic-prod-flask-nodeport-service
+    name: traffic-test-flask-nodeport-service
 spec:
     type: NodePort
     selector:
