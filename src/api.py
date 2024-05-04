@@ -17,9 +17,10 @@ import matplotlib.pyplot as plt
 
 # Global variables/constants
 app = Flask(__name__)
-rd = redis.Redis(host='redis-db', port=6379, db=0)
+env_var = os.environ.get('REDIS_IP')
+rd = redis.Redis(host=env_var, port=6379, db=0)
 
-log_var = os.environ.get('LOG_LEVEL', 'DEBUG') # set in docker-compose
+log_var = os.environ.get('LOG_LEVEL', 'DEBUG')
 logging.basicConfig(level=log_var)
 
 # Function definitions
