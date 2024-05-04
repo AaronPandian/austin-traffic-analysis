@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: traffic-prod-redis-deployment
+  name: traffic-test-redis-deployment
   labels:
     app: traffic-pvc-app
 spec:
