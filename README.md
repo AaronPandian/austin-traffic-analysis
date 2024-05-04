@@ -17,13 +17,13 @@ The traffic incident data this code requests can be found on the [Government Dat
 
 The specific CSV traffic data referenced can be found [here](https://data.austintexas.gov/api/views/dx9v-zd7x/rows.csv?accessType=DOWNLOAD). The format of the dataset starts with metadata. For the actual data, each row entry in the CSV represents a new incident indicated with a unique Traffic ID. The parameters of each incident are as follows: Traffic Report ID, Published Date, Issue Reported, Location, Latitude, Longitude, Address, Status, Status Date, and Agency.
 
-## How to Build the Container
+## Deploying Application on Local Hardware
 First, ensure the environment you are using has Docker installed, and make sure the working directory has given Redis permissions.
 
 ### Container Build Preparation
 Create a folder in your directory to input the code found in this folder by running `mkdir traffic_app`. 
 
-Run `cd traffic_app` to enter the created folder then run the `git clone https://github.com/AaronPandian/austin-traffic-analysis.git` command to import all the files from this repository into your working directory. All the files should be in this folder. In this **traffic_app** directory run `mkdir data` to create a sub-directory for Redis **only if** the empty data folder from this directory did not 
+Run `cd traffic_app` to enter the created folder then run the `git clone https://github.com/AaronPandian/austin-traffic-analysis.git` command to import all the files from this repository into your working directory. All the files should be in this folder. In this **traffic_app** directory run `mkdir data` to create a sub-directory for Redis **only if** the empty data folder from this directory did not build or if it is causing problems. 
 
 Once all the files are gathered, double-check with `ls`.  
 
@@ -35,6 +35,24 @@ Check if the build was successful with `docker images` or `docker ps -a`. You sh
 At this point, your container is running the main Python scripts in the terminal background. You can use the following section to interact with the application. 
 
 Once you are done running the Flask app remove the image using the container ID found when running `docker images`. To do this, run `docker stop <containerID>` to stop the application from running in the background, then `docker rm <containerID>` to remove the instance from your list of containers.
+
+## How to Build the Application using K8 Cluster
+Expanding on the prior method, follow the steps to run the image- make sure three images are running using `docker ps -a`. From the **traffic_app** run `cd kubernetes` to enter the Kubernetes set-up directory. From here we will run a string of commands. In order, run the following.
+```
+kubectl apply -f traffic-prod-pvc-redis.yml
+kubectl apply -f traffic-prod-service-redis.yml
+kubectl get services
+```
+Copy the IP address from the Redis service and paste it into both the Flask and worker deployment scripts (**traffic-prod-deployment-flask.yml** **traffic-prod-deployment-worker.yml**) for the environment variable REDIS_IP value. Ensure quotation marks, like the placeholder IP address surround the IP address. After saving these updates, continue running the commands in order. 
+```
+kubectl apply -f traffic-prod-service-flask.yml
+kubectl apply -f traffic-prod-deployment-flask.yml
+kubectl apply -f traffic-prod-deployment-redis.yml
+kubectl apply -f traffic-prod-deployment-worker.yml
+kubectl apply -f traffic-prod-service-nodeport-flask.yml
+kubectl apply -f traffic-prod-ingress-flask.yml
+```
+With each command, a print statement "completed" will deem a successful run. Once the cluster is in place and all three pods are running, which you can verify using `kubectl get pods`, run `kubectl get ingress`. This will provide a specialized link from which you can call the application routes from a public endpoint. Copy this link and use it as the `<URL>` for curling the routes below. 
 
 ## Accessing Routes
 Once the image is running, the terminal will wait for requests to be made using specific URL routes. Using the HTTPS URL displayed in the terminal (you can use `localhost:5000` if you executed it in the background), paste the URL and append the following routes at the end of the URL to obtain the desired functions. 
@@ -52,7 +70,7 @@ Once the image is running, the terminal will wait for requests to be made using 
 Additionally, the following commands can run job requests for more intensive operations. 
 
 * A POST request to `/jobs` queues a new job with a unique ID. The worker script will then return summary statistics for traffic incidents between a specified date range. 
-    * The command will look like `curl localhost:5000/jobs -X POST -d '{"start":"01/15/2022", "end":"01/15/2022","incident_map":"yes","incident_graph":"yes","incident_report":"yes"}' -H "Content-Type: application/json"`. The string date range is denoted within the curly brackets. 
+    * The command will look like `curl <URL>/jobs -X POST -d '{"start":"01/15/2022", "end":"01/15/2022","incident_map":"yes","incident_graph":"yes","incident_report":"yes"}' -H "Content-Type: application/json"`. The string date range is denoted within the curly brackets. 
     * The job **must** be formatted by issuing a start date that occurs before the end date. Furthermore, the format of dates **must** match the example command- days and months are 2 digits (i.e. 01, 15, 12), and years are 4 digits (i.e. 2021, 2023, 2024), separated by some character. Dates should not be before November 2020 or after the present day, since that is the expanse of the dataset. 
 * A GET request to `/jobs` returns a list of all queued job IDs.
     * The command will look like `curl <URL>/jobs`.
@@ -64,7 +82,8 @@ To view results from a requested job use the following route.
 * `/results/<jobid>` returns the analysis if the job is complete, if not it prompts the user to wait. 
 
 ## Output and What to Expect
-In running the main script from an image, the user should receive the respective information printed out to the terminal once running the routes above. Some example commands are shown below.
+In running the application and calling the routes above, the user should receive the respective information printed out to the terminal. If images are generated, instructions to view them are displayed as well. Some example commands are shown below.
+
 ##### `curl -X POST localhost:5000/data`
 ```
 ["The POST request is completed"]
@@ -155,17 +174,7 @@ This is the accident distribution for each region of austin(in the format of 'Re
  {'Downtown': 9, 'North': 6, 'NE': 62, 'NW': 30, 'East': 2, 'West': 3, 'South': 6, 'SW': 30, 'SE': 21}
 Note that downtown is defined as 30.2672 N (+- 0.01 degrees), -97.7431 W (+-0.01 degrees). Also note that the other regions are relative to downtown. For example, 'North' Austin is 30.2772 N (or greater), and -97.7431 W (+-0.01 degrees).
 ```
-Note that for this output, the job request was posted to request a report,
- chart, and map. Also, to view the chart and map, simply download the 
-graphic from the app container to the local directory of interest following
- the instructions from the output. May need to use 'docker ps -a' first to 
-see the container id for the api (not the worker or redis), which will be 
-needed to docker cp the image on linux. Also note that for the chart image,
-the x-axis label is "Date/Time" as it is relative to the queried job 
-timeframe (over several years, if the start and end year are the same then 
-over months of that year, otherwise if the start and end year and month are
- the same then over the days in that month; otherwise if the start and end 
-year, month, and day are the same, over the time (hours) of that day.
+Note that for this output, the job request was posted to request a report, chart, and map. Also, to view the chart and map, simply download the graphic from the app container to the local directory of interest following the instructions from the output. May need to use 'docker ps -a' first to see the container ID for the API (not the worker or redis), which will be needed to docker cp the image on linux. Also note that for the chart image, the x-axis label is "Date/Time" as it is relative to the queried job timeframe (over several years, if the start and end year are the same then over months of that year, otherwise if the start and end year and month are the same then over the days in that month; otherwise if the start and end year, month, and day are the same, over the time (hours) of that day.
 
 ##### `curl localhost:5000/help`
 ```
